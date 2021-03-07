@@ -58,12 +58,17 @@
      </column>
      <column>
       <property name="text">
-       <string>Soundfile</string>
+       <string>Threshold</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Path</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Soundfile</string>
       </property>
      </column>
     </widget>
@@ -178,9 +183,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="qgbWhisper">
+    <widget class="QGroupBox" name="qgbMisc">
      <property name="title">
-      <string>Whisper</string>
+      <string>Misc.</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -190,6 +195,32 @@
         </property>
         <property name="text">
          <string>Only accept whispers from friends</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="qcbMessageThreshold">
+        <property name="toolTip">
+         <string>If checked, notifications will not be played when more than the defined number of users are active on the server.</string>
+        </property>
+        <property name="text">
+         <string>Don't play notifications when there are more than the following number of users on the server.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="qsbMessageThresholdUsers">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of users that will trigger thresholding functionality.</string>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

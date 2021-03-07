@@ -338,6 +338,8 @@ Settings::Settings() {
 	bUserTop = true;
 
 	bWhisperFriends = false;
+	bMessageThreshold = false;
+	iMessageThresholdUsers = 0;
 
 	uiDoublePush = 0;
 	pttHold      = 0;
@@ -515,7 +517,7 @@ Settings::Settings() {
 	bEnableUIAccess             = true;
 
 	for (int i = Log::firstMsgType; i <= Log::lastMsgType; ++i) {
-		qmMessages.insert(i, Settings::LogConsole | Settings::LogBalloon | Settings::LogTTS);
+		qmMessages.insert(i, Settings::LogConsole | Settings::LogBalloon | Settings::LogTTS | Settings::LogMessageThreshold);
 		qmMessageSounds.insert(i, QString());
 	}
 
@@ -769,6 +771,8 @@ void Settings::load(QSettings *settings_ptr) {
 	SAVELOAD(qsAudioInput, "audio/input");
 	SAVELOAD(qsAudioOutput, "audio/output");
 	SAVELOAD(bWhisperFriends, "audio/whisperfriends");
+	SAVELOAD(bMessageThreshold, "audio/messagethreshold");
+	SAVELOAD(iMessageThresholdUsers, "audio/messagethresholdusers");
 	SAVELOAD(bTransmitPosition, "audio/postransmit");
 
 	if (settings_ptr->contains("audio/echooptionid")) {
@@ -1172,6 +1176,8 @@ void Settings::save() {
 	SAVELOAD(qsAudioInput, "audio/input");
 	SAVELOAD(qsAudioOutput, "audio/output");
 	SAVELOAD(bWhisperFriends, "audio/whisperfriends");
+	SAVELOAD(bMessageThreshold, "audio/messagethreshold");
+	SAVELOAD(iMessageThresholdUsers, "audio/messagethresholdusers");
 	SAVELOAD(bTransmitPosition, "audio/postransmit");
 	SAVEFLAG(echoOption, "audio/echooptionid");
 

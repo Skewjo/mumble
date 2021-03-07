@@ -44,6 +44,7 @@ LogConfig::LogConfig(Settings &st) : ConfigWidget(st) {
 	qtwMessages->setAccessibleName(tr("Log messages"));
 	qsVolume->setAccessibleName(tr("TTS engine volume"));
 	qsbThreshold->setAccessibleName(tr("Length threshold"));
+	qsbMessageThresholdUsers->setAccessibleName(tr("Message threshold users"));
 	qsbMaxBlocks->setAccessibleName(tr("Maximum chat length"));
 	qsbChatMessageMargins->setAccessibleName(tr("Chat message margins"));
 
@@ -56,7 +57,9 @@ LogConfig::LogConfig(Settings &st) : ConfigWidget(st) {
 	qtwMessages->header()->setSectionResizeMode(ColNotification, QHeaderView::ResizeToContents);
 	qtwMessages->header()->setSectionResizeMode(ColHighlight, QHeaderView::ResizeToContents);
 	qtwMessages->header()->setSectionResizeMode(ColTTS, QHeaderView::ResizeToContents);
+	qtwMessages->header()->setSectionResizeMode(ColMessageThreshold, QHeaderView::ResizeToContents);
 	qtwMessages->header()->setSectionResizeMode(ColStaticSound, QHeaderView::ResizeToContents);
+	
 
 	// Add a "All messages" entry
 	allMessagesItem = new QTreeWidgetItem(qtwMessages);
@@ -67,8 +70,12 @@ LogConfig::LogConfig(Settings &st) : ConfigWidget(st) {
 	allMessagesItem->setToolTip(ColNotification, QObject::tr("Toggle pop-up notifications for all events"));
 	allMessagesItem->setCheckState(ColHighlight, Qt::Unchecked);
 	allMessagesItem->setToolTip(ColHighlight, QObject::tr("Toggle window highlight (if not active) for all events"));
+	allMessagesItem->setCheckState(ColMessageThreshold, Qt::Unchecked);
+	allMessagesItem->setToolTip(ColMessageThreshold, QObject::tr("Click here to toggle message thresholding for all events"));
 	allMessagesItem->setCheckState(ColStaticSound, Qt::Unchecked);
 	allMessagesItem->setToolTip(ColStaticSound, QObject::tr("Click here to toggle sound notifications for all events"));
+
+
 #ifndef USE_NO_TTS
 	allMessagesItem->setCheckState(ColTTS, Qt::Unchecked);
 	allMessagesItem->setToolTip(ColTTS, QObject::tr("Toggle Text-to-Speech for all events"));
@@ -85,15 +92,19 @@ LogConfig::LogConfig(Settings &st) : ConfigWidget(st) {
 		twi->setCheckState(ColConsole, Qt::Unchecked);
 		twi->setCheckState(ColNotification, Qt::Unchecked);
 		twi->setCheckState(ColHighlight, Qt::Unchecked);
+		twi->setCheckState(ColMessageThreshold, Qt::Unchecked);
 		twi->setCheckState(ColStaticSound, Qt::Unchecked);
+		
 
 		twi->setToolTip(ColConsole, tr("Toggle console for %1 events").arg(messageName));
 		twi->setToolTip(ColNotification, tr("Toggle pop-up notifications for %1 events").arg(messageName));
 		twi->setToolTip(ColHighlight, tr("Toggle window highlight (if not active) for %1 events").arg(messageName));
+		twi->setToolTip(ColMessageThreshold, tr("Toggle thresholding behavior for %1 events ").arg(messageName));
 		twi->setToolTip(ColStaticSound, tr("Click here to toggle sound notification for %1 events").arg(messageName));
 		twi->setToolTip(ColStaticSoundPath, tr("Path to sound file used for sound notifications in the case of %1 "
 											   "events<br />Single click to play<br />Double-click to change")
 												.arg(messageName));
+		
 
 		twi->setWhatsThis(ColConsole, tr("Click here to toggle console output for %1 events.<br />If checked, this "
 										 "option makes Mumble output all %1 events in its message log.")
@@ -105,15 +116,21 @@ LogConfig::LogConfig(Settings &st) : ConfigWidget(st) {
 		twi->setWhatsThis(ColHighlight, tr("Click here to toggle window highlight for %1 events.<br />If checked, "
 										   "Mumble's window will be highlighted for every %1 event, if not active.")
 											.arg(messageName));
+		twi->setWhatsThis(ColMessageThreshold,
+			tr("Click here to toggle thresholding for %1 events. <br /> If checked, notifications for this event type"
+			   "will not be played when above the set number of users.<br />Ensure that the thresholding "
+			   "option below is enabled or this field will not have any effect.")
+				.arg(messageName));
 		twi->setWhatsThis(ColStaticSound, tr("Click here to toggle sound notification for %1 events.<br />If checked, "
 											 "Mumble uses a sound file predefined by you to indicate %1 events. Sound "
 											 "files and Text-To-Speech cannot be used at the same time.")
 											  .arg(messageName));
 		twi->setWhatsThis(ColStaticSoundPath,
-						  tr("Path to sound file used for sound notifications in the case of %1 events.<br />Single "
+						 tr("Path to sound file used for sound notifications in the case of %1 events.<br />Single "
 							 "click to play<br />Double-click to change<br />Ensure that sound notifications for these "
 							 "events are enabled or this field will not have any effect.")
 							  .arg(messageName));
+		
 #ifndef USE_NO_TTS
 		twi->setCheckState(ColTTS, Qt::Unchecked);
 		twi->setToolTip(ColTTS, tr("Toggle Text-To-Speech for %1 events").arg(messageName));
@@ -136,6 +153,7 @@ void LogConfig::updateSelectAllButtons() {
 	bool allTTSChecked = true;
 #endif
 	bool allSoundChecked = true;
+	bool allThresholdChecked = true;
 	foreach (QTreeWidgetItem *i, qlItems) {
 		if (i == allMessagesItem) {
 			continue;
@@ -155,6 +173,9 @@ void LogConfig::updateSelectAllButtons() {
 			allTTSChecked = false;
 		}
 #endif
+		if (i->checkState(ColMessageThreshold) != Qt::Checked) {
+			allThresholdChecked = false;
+		}
 		if (i->checkState(ColStaticSound) != Qt::Checked) {
 			allSoundChecked = false;
 		}
@@ -176,6 +197,7 @@ void LogConfig::updateSelectAllButtons() {
 #ifndef USE_NO_TTS
 	allMessagesItem->setCheckState(ColTTS, allTTSChecked ? Qt::Checked : Qt::Unchecked);
 #endif
+	allMessagesItem->setCheckState(ColMessageThreshold, allThresholdChecked ? Qt::Checked : Qt::Unchecked);
 	allMessagesItem->setCheckState(ColStaticSound, allSoundChecked ? Qt::Checked : Qt::Unchecked);
 }
 
@@ -207,10 +229,11 @@ void LogConfig::load(const Settings &r) {
 #ifndef USE_NO_TTS
 		i->setCheckState(ColTTS, (ml & Settings::LogTTS) ? Qt::Checked : Qt::Unchecked);
 #endif
+		i->setCheckState(ColMessageThreshold, (ml & Settings::LogMessageThreshold) ? Qt::Checked : Qt::Unchecked);
 		i->setCheckState(ColStaticSound, (ml & Settings::LogSoundfile) ? Qt::Checked : Qt::Unchecked);
 		i->setText(ColStaticSoundPath, r.qmMessageSounds.value(mt));
 	}
-
+	
 	qsbMaxBlocks->setValue(r.iMaxLogBlocks);
 	qcb24HourClock->setChecked(r.bLog24HourClock);
 	qsbChatMessageMargins->setValue(r.iChatMessageMargins);
@@ -226,6 +249,8 @@ void LogConfig::load(const Settings &r) {
 
 #endif
 	qcbWhisperFriends->setChecked(r.bWhisperFriends);
+	qcbMessageThreshold->setChecked(r.bMessageThreshold);
+	qsbMessageThresholdUsers->setValue(r.iMessageThresholdUsers);
 }
 
 void LogConfig::save() const {
@@ -247,6 +272,8 @@ void LogConfig::save() const {
 		if (i->checkState(ColTTS) == Qt::Checked)
 			v |= Settings::LogTTS;
 #endif
+		if (i->checkState(ColMessageThreshold) == Qt::Checked)
+			v |= Settings::LogMessageThreshold;
 		if (i->checkState(ColStaticSound) == Qt::Checked)
 			v |= Settings::LogSoundfile;
 		s.qmMessages[mt]      = v;
@@ -264,6 +291,8 @@ void LogConfig::save() const {
 	s.bTTSNoAuthor        = qcbNoAuthor->isChecked();
 #endif
 	s.bWhisperFriends = qcbWhisperFriends->isChecked();
+	s.bMessageThreshold = qcbMessageThreshold->isChecked();
+	s.iMessageThresholdUsers = qsbMessageThresholdUsers->value();
 }
 
 void LogConfig::accept() const {
@@ -717,7 +746,12 @@ void Log::log(MsgType mt, const QString &console, const QString &terse, bool own
 		}
 
 		// Message notification with static sounds
-		if ((flags & Settings::LogSoundfile)) {
+		int connectedUsers = 0;
+		{
+			QReadLocker lock(&ClientUser::c_qrwlUsers);
+			connectedUsers = ClientUser::c_qmUsers.size();
+		}
+		if ((flags & Settings::LogSoundfile) && !(flags & Settings::LogMessageThreshold && connectedUsers > g.s.iMessageThresholdUsers)) {
 			QString sSound    = g.s.qmMessageSounds.value(mt);
 			AudioOutputPtr ao = g.ao;
 			if (!ao || !ao->playSample(sSound, false)) {
@@ -725,6 +759,7 @@ void Log::log(MsgType mt, const QString &console, const QString &terse, bool own
 				flags ^= Settings::LogSoundfile | Settings::LogTTS; // Fallback to TTS
 			}
 		}
+		
 	} else if (!g.s.bTTSMessageReadBack) {
 		return;
 	}
