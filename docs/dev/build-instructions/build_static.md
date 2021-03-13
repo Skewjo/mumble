@@ -13,7 +13,10 @@ The entire build environment will require between 30GB and 60GB of space on your
 lower bound whereas a manual installation usually tends towards the higher bound.
 
 In addition to the dependencies installed via vcpkg, you'll also need [cmake](https://cmake.org/) (v3.15 or later). On Linux you might have to install
-cmake using a [PPA](https://apt.kitware.com/) and on macOS you can install it using [homebrew](https://formulae.brew.sh/formula/cmake).
+cmake using a [PPA](https://apt.kitware.com/) and on macOS you can install it using [homebrew](https://formulae.brew.sh/formula/cmake). 	
+If you're unfamiliar with CMake, be sure to check out the ["User Interaction Guide"](https://cmake.org/cmake/help/latest/guide/user-interaction/index.html#guide:User%20Interaction%20Guide) on CMake's website.
+There are, generally, 2 main steps that will be done on any open source project that you work on. The first is a "generator" step. This step will determine the native build system to be used and "compile" a list of the files to be used by your IDE. More information about CMake generators can be found [here](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). There are many CMake generators available, but these instructions use ```NMake Makefiles```. 
+The second is the actual build step that will create your executable files.
 
 Furthermore you need a C++ compiler. On Linux and MacOS that'd usually be `gcc` (`g++`) or `clang`. On Windows you probably want to use MSVC
 (checkout [these instructions](setup_visual_studio.md) on how to install it).
