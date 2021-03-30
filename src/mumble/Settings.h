@@ -170,6 +170,8 @@ struct Settings {
 	bool bTTS;
 	bool bUserTop;
 	bool bWhisperFriends;
+	bool bMessageLimit;
+	int iMessageLimitUsers;
 	bool bTTSMessageReadBack;
 	bool bTTSNoScope;
 	bool bTTSNoAuthor;
@@ -281,8 +283,10 @@ struct Settings {
 		LogTTS       = 0x02,
 		LogBalloon   = 0x04,
 		LogSoundfile = 0x08,
-		LogHighlight = 0x10
+		LogHighlight = 0x10,
+		LogMessageLimit = 0x20
 	};
+
 	int iMaxLogBlocks;
 	bool bLog24HourClock;
 	int iChatMessageMargins;
